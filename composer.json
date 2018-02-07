@@ -1,0 +1,27 @@
+{
+  "name": "selma/parsec",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "require": {
+    "jonnyw/php-phantomjs": "4.*",
+    "symfony/dom-crawler": "3.4.4",
+    "symfony/css-selector": "^4.1@dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "Parsec\\": "src/"
+    }
+  },
+  "config": {
+    "bin-dir": "src/bin"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "PhantomInstaller\\Installer::installPhantomJS"
+    ],
+    "post-update-cmd": [
+      "PhantomInstaller\\Installer::installPhantomJS"
+    ]
+  }
+}
