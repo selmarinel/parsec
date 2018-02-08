@@ -44,9 +44,13 @@ class Client
         }
     }
 
+    const WIDTH = 4085;
+    const HEIGHT = 40000;
+
     public function request($uri)
     {
         $this->request = $this->client->getMessageFactory()->createRequest($uri, 'GET');
+        $this->request->setViewportSize(self::WIDTH, self::HEIGHT);
     }
 
     public function response()

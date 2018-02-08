@@ -4,33 +4,15 @@ require_once './vendor/autoload.php';
 
 $sites = [
     ['host' => 'http://symfony.com', 'href' => '/community', 'anchor' => 'Community'],
-    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => 'examples', 'anchor' => 'can be viewed here'],
+    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => 'https://dashboard.phantomjscloud.com/dash.html', 'anchor' => 'can be viewed here'],
+    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => '../index.html', 'anchor' => '../img/logo-600.png'],
     ['host' => 'https://ruseller.com/lessons.php?id=1575&rub=37', 'href' => '#', 'anchor' => '1'],
-    ['host' => 'http://google.com', 'href' => 'iconka', 'anchor' => '11'],
+    ['host' => 'https://www.google.com/', 'href' => 'mail', 'anchor' => '11'],
 ];
 
+@$driver =new \Parsec\Driver\PhantomJs\Driver();
+$report = new \Parsec\Handler($driver);
 
-$report = new \Parsec\Components\Matches();
+var_dump($report->report($sites));
 
-function process(&$report, $site,\Parsec\Components\Site &$siteComponent)
-{
-    @$handler = new \Parsec\Handler();
-    try {
-        $handler->load($site['host']);
-    } catch (\Parsec\Exceptions\ClientParsecException $parameterNotFoundException) {
-        $report->addItem(['not found']);
-    }
 
-    $links = $handler->check($site['href'], $site['anchor']);
-    foreach ($links->all() as $link) {
-        $siteComponent->addLink($link);
-    }
-    $report->addItem($siteComponent);
-}
-
-foreach ($sites as $site) {
-    $siteComponent = new \Parsec\Components\Site();
-    $siteComponent->setUrl($site['host']);
-    process($report, $site, $siteComponent);
-}
-var_dump(\Parsec\Handler::report($report));

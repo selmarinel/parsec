@@ -5,31 +5,18 @@ namespace Parsec\Components;
 
 class Site
 {
+    public $linkFrom;
+    public $linkTo;
+    public $anchor;
+    public $vendor;
+    public $status;
 
-    private $links = [];
+    const LIVE = 'LIVE';
+    const NOT_FOUND = 'NOT_FOUND';
+    const ANCHOR_MISMATCH = 'ANCHOR MISMATCH';
 
-    private $url;
+    public $links = [];
 
-    /**
-     * @param mixed $url
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
-    }
 
-    public function getUrl()
-    {
-        return $this->url;
-    }
 
-    public function addLink(Link $link)
-    {
-        $this->links[] = $link;
-    }
-
-    public function getLinks()
-    {
-        return $this->links;
-    }
 }

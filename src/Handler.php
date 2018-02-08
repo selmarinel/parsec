@@ -2,130 +2,96 @@
 
 namespace Parsec;
 
-use Parsec\Client\Client;
-use Parsec\Components\Link;
 use Parsec\Components\Matches;
 use Parsec\Components\Site;
-use Parsec\Crawler\Parser;
-use Parsec\Exceptions\ClientParsecException;
+use Parsec\DOMEntities\ImageDomComponent;
+use Parsec\DOMEntities\LinkDOMComponent;
+use Parsec\Driver\DriverInterface;
+use Parsec\Exceptions\ParsecException;
 
 class Handler
 {
-    /** @var Client */
-    private $client;
-    /** @var Parser */
-    private $parser;
+    /** @var DriverInterface */
+    private $driver;
 
     /**
      * Handler constructor.
+     * @param DriverInterface $driver
      */
-    public function __construct()
+    public function __construct(DriverInterface $driver)
     {
-        $this->client = new Client;
-        $this->parser = new Parser;
+        $this->driver = $driver;
     }
 
     /**
      * @param $uri
-     * @throws ClientParsecException
+     * @param int $timeout
      */
-    public function load($uri)
+    public function load($uri, $timeout = 5000)
     {
-        $this->client->connect($uri);
-        $this->parser->initResponseContent($this->client->getResponse());
+        $this->driver->connect($uri, $timeout);
     }
 
     /**
-     * @param $href
+     * @return DriverInterface
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * @param array $sites
      * @return Matches
+     * @throws ParsecException
      */
-    public function findLinksByHref($href)
+    public function report(Array $sites)
     {
-        $links = $this->parser->filter('a');
-        $result = new Matches();
-        foreach ($links as $link) {
-            if (mb_strpos($link->getAttribute('href'), $href) !== false) {
-                $result->addItem($link);
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * @param \DOMElement $link
-     * @param $text
-     * @return bool
-     */
-    public function checkLinkText(\DOMElement $link, $text)
-    {
-        return trim($link->textContent) == $text;
-    }
-
-    /**
-     * @param \DOMElement $link
-     * @param $src
-     * @return bool
-     */
-    public function checkLinkImage(\DOMElement $link, $src)
-    {
-        $img = $link->getElementsByTagName('img');
-        $result = false;
-        if ($img->length) {
-            $result = trim($img->item(0)->getAttribute('src')) == $src;
-        }
-        return $result;
-    }
-
-    /**
-     * @param $href
-     * @param $anchor
-     * @return Matches
-     */
-    public function check($href, $anchor)
-    {
-        $links = $this->findLinksByHref($href);
-        $result = new Matches();
-        foreach ($links->all() as $link) {
-
-            $linkComponent = new Link();
-            $linkComponent->setFrom($this->client->getRequest()->getUrl());
-            $linkComponent->setTo($href);
-            $linkComponent->setAnchor($anchor);
-            $linkComponent->setStatus(Link::ANCHOR_MISMATCH);
-
-            if ($this->checkLinkText($link, $anchor) || $this->checkLinkImage($link, $anchor)) {
-                $linkComponent->setStatus(Link::LIVE);
-            }
-            $result->addItem($linkComponent);
-
-        }
-        return $result;
-    }
-
-    public static function report(Matches $matches)
-    {
-        $report = new Matches();
-        foreach ($matches->all() as $match) {
-            if ($match instanceof Site) {
-
-                if (!$match->getLinks()) {
-                    $report->addItem([Link::NOT_FOUND, $match->getUrl()]);
-                    continue;
+        $result = new Matches();;
+        foreach ($sites as $site) {
+            $siteComponent = new Site();
+            $siteComponent->linkFrom = $site['host'];
+            $siteComponent->linkTo = $site['href'];
+            $siteComponent->anchor = $site['anchor'];
+            $siteComponent->status = Site::NOT_FOUND;
+            try {
+                $this->driver->connect($site['host']);
+                /** @var Matches $links */
+                $links = $this->driver->getElements("a[href='{$site['href']}']");
+                $siteComponent->links = $links->all();
+                if ($links->count()) {
+                    $siteComponent->status = $this->checkLinks(
+                        $links,
+                        $site['anchor']) ? Site::LIVE : Site::ANCHOR_MISMATCH;
                 }
-                $isLive = false;
-                foreach ($match->getLinks() as $link) {
-                    /** @var Link $link */
-                    if ($link->getStatus() === Link::LIVE) {
-                        $isLive = true;
+            } catch (\Exception $exception) {
+                throw new ParsecException;
+            } finally {
+                $this->driver->close();
+                $result->addItem($siteComponent);
+            }
+        }
+        return $result;
+    }
+
+    public function checkLinks(Matches $links, $checkAnchor = '')
+    {
+        $result = false;
+        foreach ($links->all() as $link) {
+            /** @var  LinkDOMComponent $link */
+            if (mb_strripos($link->text, $checkAnchor) !== false) {
+                $result = true;
+            }
+            if (!empty($link->embedded)) {
+                foreach ($link->embedded as $item) {
+                    if ($item instanceof ImageDomComponent) {
+                        if (mb_strripos($item->src, $checkAnchor) !== false) {
+                            $result = true;
+                        }
                     }
                 }
-                $report->addItem([
-                    ($isLive) ? Link::LIVE : Link::ANCHOR_MISMATCH,
-                    $match->getUrl()
-                ]);
             }
         }
-        return $report->all();
+        return $result;
     }
-
 }

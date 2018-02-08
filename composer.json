@@ -6,7 +6,8 @@
   "require": {
     "jonnyw/php-phantomjs": "4.*",
     "symfony/dom-crawler": "3.4.4",
-    "symfony/css-selector": "^4.1@dev"
+    "symfony/css-selector": "^4.1@dev",
+    "facebook/webdriver": "dev-master"
   },
   "autoload": {
     "psr-4": {
