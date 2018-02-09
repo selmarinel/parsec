@@ -20,23 +20,36 @@ class Driver implements DriverInterface, HasScenarios
     private $capability;
     /** @var RemoteWebDriver */
     private $driver;
-
+    /** @var array */
+    private $scenarios = [];
+    /** @var Matches */
+    private $elements;
 
     public function __construct()
     {
-        $this->capability = DesiredCapabilities::firefox();
+        $this->elements = new Matches();
     }
 
+    /**
+     * @param DesiredCapabilities $capability
+     */
     public function setCapability(DesiredCapabilities $capability)
     {
         $this->capability = $capability;
     }
 
+    /**
+     * @param $host
+     */
     public function setHost($host)
     {
         $this->host = $host;
     }
 
+    /**
+     * @param $url
+     * @param null $connectionTimeout
+     */
     public function connect($url, $connectionTimeout = null)
     {
         $this->driver = RemoteWebDriver::create(
@@ -46,14 +59,18 @@ class Driver implements DriverInterface, HasScenarios
         $this->driver->get($url);
     }
 
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-
     public function close()
     {
         $this->driver->close();
+        $this->elements->erase();
+    }
+
+    /**
+     * @return RemoteWebDriver
+     */
+    public function getDriver()
+    {
+        return $this->driver;
     }
 
     /**
@@ -64,7 +81,6 @@ class Driver implements DriverInterface, HasScenarios
     {
         $tag = \WebDriverBy::cssSelector($selector);
         $elements = $this->driver->findElements($tag);
-        $result = new Matches();
         foreach ($elements as $element) {
             $link = new LinkDOMComponent();
             $link->href = $element->getAttribute('href');
@@ -78,16 +94,25 @@ class Driver implements DriverInterface, HasScenarios
                 $imageComponent->alt = $image[0]->getAttribute('alt');
                 $link->addEmbed($imageComponent);
             }
-            $result->addItem($link);
+            $this->elements->addItem($link);
         }
-        return $result;
+        return $this->elements;
     }
 
-    private $scenarios = [];
-
+    /**
+     * @param array $scenarios
+     */
     public function setScenarios(Array $scenarios)
     {
         $this->scenarios = $scenarios;
+    }
+
+    /**
+     * @return array
+     */
+    public function getScenarios()
+    {
+        return $this->scenarios;
     }
 
     public function runScenarios()
@@ -99,6 +124,4 @@ class Driver implements DriverInterface, HasScenarios
         }
 
     }
-
-
 }

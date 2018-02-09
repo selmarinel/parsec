@@ -13,5 +13,7 @@ interface HasScenarios
 {
     public function setScenarios(Array $scenarios);
 
+    public function getScenarios();
+
     public function runScenarios();
 }

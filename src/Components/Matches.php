@@ -51,4 +51,9 @@ class Matches
         return (array)$items;
     }
 
+    public function erase()
+    {
+        $this->items = [];
+    }
+
 }

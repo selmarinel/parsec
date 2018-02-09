@@ -8,7 +8,8 @@ use Parsec\DOMEntities\ImageDomComponent;
 use Parsec\DOMEntities\LinkDOMComponent;
 use Parsec\Driver\DriverInterface;
 use Parsec\Driver\HasScenarios;
-use Parsec\Driver\Selenium\Scenarios\ScrollScenario;
+use Parsec\Driver\Selenium\Scenarios\AbstractStreamingScenario;
+use Parsec\Driver\Selenium\Scenarios\ScenarioInterface;
 use Parsec\Exceptions\ParsecException;
 
 class Handler
@@ -32,9 +33,6 @@ class Handler
     public function load($uri, $timeout = 5000)
     {
         $this->driver->connect($uri, $timeout);
-        if ($this->driver instanceof HasScenarios) {
-            $this->driver->runScenarios();
-        }
     }
 
     /**
@@ -66,17 +64,24 @@ class Handler
             $siteComponent->linkTo = $site['href'];
             $siteComponent->anchor = $site['anchor'];
             $siteComponent->status = Site::NOT_FOUND;
+
             try {
                 $this->load($site['host']);
-                /** @var Matches $links */
-                $links = $this->driver->getElements("a[href='{$site['href']}']");
-                $siteComponent->links = $links->all();
-                if ($links->count()) {
-                    $siteComponent->status = $this->checkLinks(
-                        $links,
-                        $site['anchor']) ? Site::LIVE : Site::ANCHOR_MISMATCH;
+
+                if ($this->driver instanceof HasScenarios) {
+                    foreach ($this->hackForUniqueScenarios($this->driver->getScenarios()) as $scenario) {
+
+                        if ($scenario instanceof ScenarioInterface) {
+                            $scenario->act($this->driver->getDriver());
+                        }
+                        $this->findLinks($siteComponent, $site);
+                    }
+                } else {
+                    $this->findLinks($siteComponent, $site);
                 }
+
             } catch (\Exception $exception) {
+                $siteComponent->status = Site::EXCEPTION;
                 throw new ParsecException($exception->getMessage(), $exception->getCode(), $exception);
             } finally {
                 $result->addItem($siteComponent);
@@ -86,6 +91,47 @@ class Handler
         return $result;
     }
 
+    public function findLinks(Site $siteComponent, array $site)
+    {
+        /** @var Matches $links */
+        $links = $this->driver->getElements("a[href='{$site['href']}']");
+        $siteComponent->links = array_merge($siteComponent->links, $links->all());
+        if ($links->count()) {
+            $siteComponent->status = $this->checkLinks(
+                $links,
+                $site['anchor']) ? Site::LIVE : Site::ANCHOR_MISMATCH;
+        }
+    }
+
+    /**
+     * TODO BAD CODE!!!!!
+     * @param array $scenarios
+     * @return array
+     */
+    private function hackForUniqueScenarios(array $scenarios)
+    {
+        $result = [];
+        foreach ($scenarios as $index => $scenario) {
+
+            if ($scenario instanceof AbstractStreamingScenario) {
+                $newScenario = new AbstractStreamingScenario($scenario->getDriver());
+                $newScenario->setCssElement($scenario->getCssElement());
+
+                unset($scenarios[$index]);
+                $result[$index] = $newScenario;
+
+            } else {
+                $result[$index] = $scenario;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param Matches $links
+     * @param string $checkAnchor
+     * @return bool
+     */
     public function checkLinks(Matches $links, $checkAnchor = '')
     {
         $result = false;

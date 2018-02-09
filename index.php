@@ -3,11 +3,11 @@ echo "<pre>";
 require_once './vendor/autoload.php';
 
 $sites = [
-    ['host' => 'http://symfony.com', 'href' => '/community', 'anchor' => 'Community'],
-    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => 'https://dashboard.phantomjscloud.com/dash.html', 'anchor' => 'can be viewed here'],
-    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => '../index.html', 'anchor' => '../img/logo-600.png'],
-    ['host' => 'https://ruseller.com/lessons.php?id=1575&rub=37', 'href' => '#', 'anchor' => '1'],
-    ['host' => 'https://www.google.com/', 'href' => 'mail', 'anchor' => '11'],
+    ['host' => 'http://symfony.com', 'href' => '/community', 'anchor' => 'Community'], // live
+    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => 'https://dashboard.phantomjscloud.com/dash.html', 'anchor' => 'can be viewed here'], //anchor MISMATCH
+    ['host' => 'https://phantomjscloud.com/docs/php.html', 'href' => '../index.html', 'anchor' => 'https://phantomjscloud.com/img/logo-600.png'], // live
+//    ['host' => 'https://ruseller.com/lessons.php?id=1575&rub=37', 'href' => '#', 'anchor' => '1'], // anchor MISMATCH
+    ['host' => 'https://www.google.com/', 'href' => 'mail', 'anchor' => '11'], // not found
 ];
 
 //@$driver = new \Parsec\Driver\PhantomJs\Driver();
@@ -18,7 +18,14 @@ $desiredCapabilities = DesiredCapabilities::chrome();
 $driver->setCapability($desiredCapabilities);
 
 $report = new \Parsec\Handler($driver);
-$report->setScenarios([new \Parsec\Driver\Selenium\Scenarios\ScrollScenario()]);
+
+$clickerScenario = new \Parsec\Driver\Selenium\Scenarios\AbstractStreamingScenario($driver);
+$clickerScenario->setCssElement("a[href='/blog/']");
+
+$report->setScenarios([
+    new \Parsec\Driver\Selenium\Scenarios\ScrollScenario(),
+//    $clickerScenario
+]);
 try {
     $sites = $report->report($sites);
 } catch (Exception $exception) {
@@ -51,6 +58,7 @@ function save(\Parsec\Components\Matches $matches)
 }
 
 save($sites);
+
 var_dump($sites);
 
 
