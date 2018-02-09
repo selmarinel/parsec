@@ -7,6 +7,8 @@ use Parsec\Components\Site;
 use Parsec\DOMEntities\ImageDomComponent;
 use Parsec\DOMEntities\LinkDOMComponent;
 use Parsec\Driver\DriverInterface;
+use Parsec\Driver\HasScenarios;
+use Parsec\Driver\Selenium\Scenarios\ScrollScenario;
 use Parsec\Exceptions\ParsecException;
 
 class Handler
@@ -30,6 +32,9 @@ class Handler
     public function load($uri, $timeout = 5000)
     {
         $this->driver->connect($uri, $timeout);
+        if ($this->driver instanceof HasScenarios) {
+            $this->driver->runScenarios();
+        }
     }
 
     /**
@@ -38,6 +43,13 @@ class Handler
     public function getDriver()
     {
         return $this->driver;
+    }
+
+    public function setScenarios(array $scenarios)
+    {
+        if ($this->driver instanceof HasScenarios) {
+            $this->driver->setScenarios($scenarios);
+        }
     }
 
     /**
@@ -55,7 +67,7 @@ class Handler
             $siteComponent->anchor = $site['anchor'];
             $siteComponent->status = Site::NOT_FOUND;
             try {
-                $this->driver->connect($site['host']);
+                $this->load($site['host']);
                 /** @var Matches $links */
                 $links = $this->driver->getElements("a[href='{$site['href']}']");
                 $siteComponent->links = $links->all();
@@ -65,7 +77,7 @@ class Handler
                         $site['anchor']) ? Site::LIVE : Site::ANCHOR_MISMATCH;
                 }
             } catch (\Exception $exception) {
-                throw new ParsecException($exception->getMessage(),$exception->getCode(),$exception);
+                throw new ParsecException($exception->getMessage(), $exception->getCode(), $exception);
             } finally {
                 $result->addItem($siteComponent);
                 $this->driver->close();

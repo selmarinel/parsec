@@ -8,10 +8,11 @@ use Parsec\Components\Matches;
 use Parsec\DOMEntities\ImageDomComponent;
 use Parsec\DOMEntities\LinkDOMComponent;
 use Parsec\Driver\DriverInterface;
+use Parsec\Driver\HasScenarios;
+use Parsec\Driver\Selenium\Scenarios\ScenarioInterface;
 use RemoteWebDriver;
-use WebDriverBy;
 
-class Driver implements DriverInterface
+class Driver implements DriverInterface, HasScenarios
 {
     /** @var string */
     private $host = 'http://localhost:4444/wd/hub';
@@ -81,5 +82,23 @@ class Driver implements DriverInterface
         }
         return $result;
     }
+
+    private $scenarios = [];
+
+    public function setScenarios(Array $scenarios)
+    {
+        $this->scenarios = $scenarios;
+    }
+
+    public function runScenarios()
+    {
+        foreach ($this->scenarios as $scenario) {
+            if ($scenario instanceof ScenarioInterface) {
+                $scenario->act($this->getDriver());
+            }
+        }
+
+    }
+
 
 }

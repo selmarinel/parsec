@@ -12,11 +12,13 @@ $sites = [
 
 //@$driver = new \Parsec\Driver\PhantomJs\Driver();
 @$driver = new \Parsec\Driver\Selenium\Driver();
+
 $desiredCapabilities = DesiredCapabilities::chrome();
 //$desiredCapabilities->setCapability('acceptSslCerts', false);
 $driver->setCapability($desiredCapabilities);
 
 $report = new \Parsec\Handler($driver);
+$report->setScenarios([new \Parsec\Driver\Selenium\Scenarios\ScrollScenario()]);
 try {
     $sites = $report->report($sites);
 } catch (Exception $exception) {
