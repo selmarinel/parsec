@@ -1,0 +1,6 @@
+"Link from",Anchor,"Link to",Vendor,Status,"Our OBL"
+http://symfony.com,Community,/community,,LIVE,2
+https://phantomjscloud.com/docs/php.html,"can be viewed here",https://dashboard.phantomjscloud.com/dash.html,,"ANCHOR MISMATCH",1
+https://phantomjscloud.com/docs/php.html,../img/logo-600.png,../index.html,,"ANCHOR MISMATCH",2
+https://ruseller.com/lessons.php?id=1575&rub=37,1,#,,"ANCHOR MISMATCH",2
+https://www.google.com/,11,mail,,NOT_FOUND,0

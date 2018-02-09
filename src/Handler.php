@@ -65,10 +65,10 @@ class Handler
                         $site['anchor']) ? Site::LIVE : Site::ANCHOR_MISMATCH;
                 }
             } catch (\Exception $exception) {
-                throw new ParsecException;
+                throw new ParsecException($exception->getMessage(),$exception->getCode(),$exception);
             } finally {
-                $this->driver->close();
                 $result->addItem($siteComponent);
+                $this->driver->close();
             }
         }
         return $result;

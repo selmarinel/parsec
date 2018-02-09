@@ -68,12 +68,13 @@ class Driver implements DriverInterface
             $link = new LinkDOMComponent();
             $link->href = $element->getAttribute('href');
             $link->text = $element->getText();
+            $tag = \WebDriverBy::cssSelector('img');
 
-            $image = $element->findElement(\WebDriverBy::tagName('img'));
-            if ($image) {
+            $image = $element->findElements($tag);
+            if (count($image)) {
                 $imageComponent = new ImageDomComponent();
-                $imageComponent->src = $image->getAttribute('src');
-                $imageComponent->alt = $image->getAttribute('alt');
+                $imageComponent->src = $image[0]->getAttribute('src');
+                $imageComponent->alt = $image[0]->getAttribute('alt');
                 $link->addEmbed($imageComponent);
             }
             $result->addItem($link);
