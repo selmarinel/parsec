@@ -9,6 +9,7 @@
 namespace Parsec\Driver\Selenium\Scenarios;
 
 
+use Parsec\Driver\ScenarioInterface;
 use Parsec\Driver\Selenium\Driver;
 use RemoteWebDriver;
 
@@ -21,7 +22,7 @@ class AbstractStreamingScenario implements ScenarioInterface
     /** @var string */
     private $cssElement;
     /** @var int */
-    private $depth = 2;
+    private $depth = 30;
 
     public function __construct(Driver $driver)
     {
@@ -64,18 +65,21 @@ class AbstractStreamingScenario implements ScenarioInterface
             return false;
         }
         $elements[0]->click();
-        sleep(1);
+        sleep(2);
         return true;
     }
 
-    public function act(RemoteWebDriver $driver)
+    public function act($driver)
     {
-        $iterator = false;
         $i = 0;
-        while ($iterator == false && $i <= $this->depth) {
-            sleep(1);
-            $iterator = $this->runIteration();
+        do {
+            try {
+                $this->runIteration();
+            } catch (\Exception $exception) {
+
+            }
             $i++;
-        }
+        } while ($i <= $this->depth);
+
     }
 }

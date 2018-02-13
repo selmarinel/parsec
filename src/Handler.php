@@ -8,8 +8,8 @@ use Parsec\DOMEntities\ImageDomComponent;
 use Parsec\DOMEntities\LinkDOMComponent;
 use Parsec\Driver\DriverInterface;
 use Parsec\Driver\HasScenarios;
+use Parsec\Driver\ScenarioInterface;
 use Parsec\Driver\Selenium\Scenarios\AbstractStreamingScenario;
-use Parsec\Driver\Selenium\Scenarios\ScenarioInterface;
 use Parsec\Exceptions\ParsecException;
 
 class Handler

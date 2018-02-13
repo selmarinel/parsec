@@ -2,11 +2,12 @@
 
 namespace Parsec\Driver\Selenium\Scenarios;
 
+use Parsec\Driver\ScenarioInterface;
 use RemoteWebDriver;
 
 class ScrollScenario implements ScenarioInterface
 {
-    public function act(RemoteWebDriver $driver)
+    public function act($driver)
     {
         $this->isEndOfPage($driver);
     }

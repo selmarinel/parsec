@@ -7,7 +7,8 @@
     "jonnyw/php-phantomjs": "4.*",
     "symfony/dom-crawler": "3.4.4",
     "symfony/css-selector": "^4.1@dev",
-    "facebook/webdriver": "dev-master"
+    "facebook/webdriver": "dev-master",
+    "merlinthemagic/mts": "dev-master"
   },
   "require-dev": {
     "phpspec/phpspec": "^4.0"

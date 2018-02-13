@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe31da2dda384c4b54ed35241917d9a4",
+    "content-hash": "92aba9cf3fb279c6d8b832e3e2a96d47",
     "packages": [
         {
             "name": "facebook/webdriver",
@@ -152,6 +152,50 @@
                 "testing"
             ],
             "time": "2017-04-22T21:24:02+00:00"
+        },
+        {
+            "name": "merlinthemagic/mts",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/merlinthemagic/MTS.git",
+                "reference": "140b97b775dc8c97289e9da86d15b7404f8d3aa9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/merlinthemagic/MTS/zipball/140b97b775dc8c97289e9da86d15b7404f8d3aa9",
+                "reference": "140b97b775dc8c97289e9da86d15b7404f8d3aa9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "MTS/EnableMTS.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Martin Madsen",
+                    "email": "dev@martinpetermadsen.com",
+                    "homepage": "https://github.com/merlinthemagic",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Automation Tools",
+            "homepage": "https://github.com/merlinthemagic/MTS",
+            "keywords": [
+                "automation",
+                "bash",
+                "browser",
+                "phantomjs",
+                "php",
+                "shell"
+            ],
+            "time": "2017-11-19T13:40:55+00:00"
         },
         {
             "name": "psr/container",
@@ -1583,7 +1627,8 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "symfony/css-selector": 20,
-        "facebook/webdriver": 20
+        "facebook/webdriver": 20,
+        "merlinthemagic/mts": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
